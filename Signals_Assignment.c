@@ -7,29 +7,27 @@
 static int condition = 1;
 
 void sig_handler5(int sig){
-    write(STDOUT_FILENO, "Child proccess stopped   ", 25);
+    write(STDOUT_FILENO, "Child proccess stopped(5)   \n", 30);
     exit(1);
 }
 
 void sig_handler4(int sig){
-    write(STDOUT_FILENO, "You divided 0 by 0   \n", 23);
+    write(STDOUT_FILENO, "You divided 0 by 0(4)   \n", 26);
     fflush(stdout);
+    struct sigaction siga = {0};
+    siga.sa_handler = sig_handler5;
+    sigaction(SIGCHLD, &siga, NULL);
     int pid = fork();
     if(pid == 0){
         usleep(500);
-        kill(pid, SIGKILL);
+        kill(getpid(), SIGTERM);
     }
-    else{
-        struct sigaction siga = {0};
-        siga.sa_handler = sig_handler5;
-        sigaction(SIGCHLD, &siga, NULL);
-    }
-    wait(NULL);
+    wait(0);
 }
 
 void sig_handler3(int sig){
     condition = 0;
-    write(STDOUT_FILENO, "Seg fault avoided   \n", 22);
+    write(STDOUT_FILENO, "Seg fault avoided(3)   \n", 25);
     struct sigaction siga = {0};
     siga.sa_handler = sig_handler4;
     sigaction(SIGFPE, &siga, NULL);
@@ -39,7 +37,7 @@ void sig_handler3(int sig){
 }
 
 void sig_handler1(int sig){
-    write(STDOUT_FILENO, "alarm   \n", 10);
+    write(STDOUT_FILENO, "alarm(2)   \n", 13);
     struct sigaction siga = {0};
     siga.sa_handler = sig_handler3;
     sigaction(SIGSEGV, &siga, NULL);
@@ -53,7 +51,7 @@ void sig_handler1(int sig){
 }
 
 void sig_handler2(int sig){
-    write(STDOUT_FILENO, "Tried to interrupt \n", 21);
+    write(STDOUT_FILENO, "Tried to interrupt(1) \n", 24);
     struct sigaction siga = {0};
     siga.sa_handler = sig_handler1;
     sigaction(SIGALRM, &siga, NULL);
@@ -62,28 +60,6 @@ void sig_handler2(int sig){
 
 
 int main(){
-    // int pid = fork();
-    // if(pid == 0){
-    //     // struct sigaction siga;
-    //     // siga.sa_handler = &sig_handler2;
-    //     // sigaction(SIGUSR1, &siga, NULL);
-    //     while(condition == 1){
-    //         sleep(2);
-    //         // printf("\nThis is the child proccess\n");
-    //         kill(getppid(), SIGUSR1);
-    //     }
-    // }
-    // else{
-    //     struct sigaction siga;
-    //     siga.sa_handler = &sig_handler1;
-    //     sigaction(SIGUSR1, &siga, NULL);
-    //     printf("Pick a number between 0 and 100\n");
-    //     int num = 0;
-    //     scanf("%d", &num);
-    //     printf("You picked the number %d\n", num);
-    //     // condition = 0;
-    //     kill(0, SIGUSR1);
-    // }
     printf("Start\n");
     struct sigaction siga = {0};
     siga.sa_handler = sig_handler2;
